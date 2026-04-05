@@ -1,0 +1,60 @@
+﻿@using StudentManagementWeb.Models
+<h2 class="text-center">Student List</h2>
+<div>
+    <a class="btn btn-secondary mb-2" asp-action="ExportCsv">Xuất file</a>
+    <div class="d-flex justify-content-between">
+        <a asp-action="Create" class="btn btn-primary">Create New</a>
+        <form method="get" asp-action="Index">
+            <div class="d-flex">
+                <input type="number" class="me-2" name="searchId" placeholder="Nhập ID..." />
+                <button type="submit" class="btn btn-primary">Tìm</button>
+            </div>
+        </form>
+    </div>
+    <br />
+    <div class="dropdown d-flex justify-content-end">
+        <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            Sắp xếp / Lọc
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+            <li><h6 class="dropdown-header">Sắp xếp</h6></li>
+            <li><a class="dropdown-item" asp-action="Index" asp-route-sortOrder="">Mặc định</a></li>
+            <li><a class="dropdown-item" asp-action="Index" asp-route-sortOrder="gpa_desc">GPA giảm dần</a></li>
+            <li><a class="dropdown-item" asp-action="Index" asp-route-sortOrder="gpa_asc">GPA tăng dần</a></li>
+            <li><a class="dropdown-item" asp-action="Index" asp-route-sortOrder="name_asc">Tên A → Z</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><h6 class="dropdown-header">Lọc</h6></li>
+            <li><a class="dropdown-item" asp-action="Index" asp-route-sortOrder="gpa_gt_3">Chỉ GPA &gt; 3.0</a></li>
+        </ul>
+    </div>
+    <table class="table table-bordered mt-3">
+        <thead>
+            <tr class="text-center">
+                <th>Id</th>
+                <th>Full Name</th>
+                <th>Class</th>
+                <th>Age</th>
+                <th>GPA</th>
+                <th width="15%">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var s in Model)
+            {
+                <tr class="text-center">
+                    <td>@s.Id</td>
+                    <td>@s.Name</td>
+                    <td>@s.ClassName</td>
+                    <td>@s.Age</td>
+                    <td>@s.Gpa</td>
+                    <td class="text-center">
+                        <a asp-route-id="@s.Id" asp-action="Delete" onclick="return confirm('Bạn có chắc chắn muốn xóa sinh viên này?')" class="btn btn-danger">Xóa</a>
+                        <a class="btn btn-warning" asp-action="Edit" asp-route-id="@s.Id">Chỉnh sửa</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    
+</div>
