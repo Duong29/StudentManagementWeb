@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using StudentManagementWeb.Data;
+using StudentManagementWeb.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IStudentService, StudentService>();
 // Đăng ký DbContext 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));

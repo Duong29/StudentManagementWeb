@@ -2,114 +2,76 @@
 using Microsoft.Data.SqlClient;
 using StudentManagementWeb.Data;
 using StudentManagementWeb.Models;
+using StudentManagementWeb.Services;
 using System.Text;
 
 namespace StudentManagementWeb.Controllers
 {
     public class StudentController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly IStudentService _studentService;
         //Constructor
-        public StudentController(ApplicationDbContext context)
+        public StudentController(IStudentService studentService)
         {
-            _context = context;
+            _studentService = studentService;
         }
         // Hiển thị danh sách sv
         public IActionResult Index(int? searchId, string sortOrder)
         {
-            var students = _context.Students.AsQueryable();
-            if(searchId != null)
-            {
-                students = students.Where(s => s.Id == searchId);
-            }
-            switch (sortOrder)
-            {
-                case "gpa_desc":
-                    students = students.OrderByDescending(s => s.Gpa);
-                    break;
-                case "gpa_asc":
-                    students = students.OrderBy(s => s.Gpa);
-                    break;
-                case "name_asc":
-                    students = students.OrderBy(s => s.Name);
-                    break;
-                case "gpa_gt_3":
-                    students = students.Where(s => s.Gpa > 3);
-                    break;
-                default:
-                    students = students.OrderBy(s => s.Id);
-                    break;
-
-            }
-            return View(students.ToList());
+            var students = _studentService.GetAll(searchId, sortOrder);
+            
+            return View(students);
         }
-        // Hiển thị form thêm sv
+        [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
-        // Thêm sv
         [HttpPost]
         public IActionResult Create(Student student)
         {
             if (!ModelState.IsValid)
             {
-                return View();
-                
+                return View(student);
             }
-            _context.Students.Add(student);
-            _context.SaveChanges(); // Gửi lệnh insert xuống sql
+            _studentService.Add(student);
             return RedirectToAction("Index");
         }
-        
-        // Xóa sv
+
         public IActionResult Delete(int id)
         {
-            var student = _context.Students.Find(id);
-            if(student == null)
-            {
-                return NotFound();
-            }
-            _context.Students.Remove(student);
-            _context.SaveChanges(); // Gửi lệnh delete xuống sql
+            _studentService.Delete(id);
             return RedirectToAction("Index");
         }
-        // Hiển thị form cập nhật sv
+
         public IActionResult Edit(int id)
         {
-            var student = _context.Students.Find(id);
+            var student = _studentService.GetById(id);
             if(student == null)
             {
                 return NotFound();
             }
-            return (View(student));
+            return View(student);
         }
-        // Cập nhật sv
         [HttpPost]
         public IActionResult Edit(Student student)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Update(student);
-                _context.SaveChanges();
-                return RedirectToAction("Index");
+                return View(student);
             }
-            return View(student);
+
+            _studentService.Update(student);
+            return RedirectToAction("Index");
         }
         // Xuất file
         public IActionResult ExportCsv()
         {
-            var students = _context.Students.ToList();
-            var csv = new StringBuilder();
-            csv.AppendLine("Id,Name,Class,Age,Gpa");
+            var fileBytes = _studentService.ExportCsv();
 
-            foreach (var s in students)
-            {
-                csv.AppendLine($"{s.Id},{s.Name},{s.ClassName},{s.Age},{s.Gpa}");
-            }
-
-            return File(Encoding.UTF8.GetBytes(csv.ToString()),
-                        "text/csv", "Students.csv");
+            return File(fileBytes,
+                        "text/csv",
+                        "Students.csv");
         }
 
     }
